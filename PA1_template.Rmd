@@ -65,7 +65,7 @@ names(stepsPerinterval) <- c("interval", "steps")
 
 And making a time series plot with ggplot2 plotting system
 
-```{r stepsPerinterval, fig.path='figures/', echo=TRUE}
+```{r stepsPerInterval, fig.path='figures/', echo=TRUE}
 ggplot(stepsPerinterval) + 
     aes(x = interval, y = steps) + 
     geom_line() + 

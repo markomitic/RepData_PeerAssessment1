@@ -88,7 +88,7 @@ ggplot(stepsPerinterval) +
     labs(title = "Time series plot of average number of steps per 5-minute interval")
 ```
 
-![](figures/stepsPerinterval-1.png) 
+![](figures/stepsPerInterval-1.png) 
 
 To answer the question which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps we get that this is the interval:
 
