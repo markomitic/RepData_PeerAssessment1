@@ -3,7 +3,8 @@
 
 ## Loading and preprocessing the data
 
-Unzip the "activity.zip" file and place the CSV "activity.csv" in working directory
+Data file -  "activity.csv" is in working directory. We can get the csv by unzipping the "activity.zip". 
+We can load the data from that CSV file.
 
 
 ```r
@@ -14,21 +15,21 @@ There's no need for additional processing the data.
 
 ## What is mean total number of steps taken per day?
 
-We need to aggregate the data by making a sum of number of steps per each day. We are dropping missing values from dataset
+We need to aggregate the data by making a sum of number of steps per each day. We are dropping missing values from the dataset.
 
 
 ```r
 stepsPerDay <- aggregate(activityData[, 'steps'], by = list(activityData$date), FUN = sum, na.rm = TRUE)
 ```
 
-And we can give more descriptive names to our columns
+And we can give more descriptive names to our columns.
 
 
 ```r
 names(stepsPerDay) <- c("date", "steps")
 ```
 
-So now we can use stepsPerDay variable as our dataset to make histogram of the total number of steps taken each day. We are using ggplot2 for plotting system.
+So now we can use stepsPerDay variable as our dataset to make histogram of the total number of steps taken each day. We are using ggplot2 as our plotting system.
 
 
 ```r
@@ -44,7 +45,7 @@ qplot(x = stepsPerDay$steps,
 
 ![](figures/histogram-1.png) 
 
-These are the mean and median total number of steps taken per day
+These are the mean and median total number of steps taken per day.
 
 
 ```r
@@ -64,25 +65,25 @@ median(stepsPerDay$steps)
 ```
 
 ## What is the average daily activity pattern?
-Now we're aggreagating the data by 5-minute intervals, and we're also dropping NA values
+Now we're aggreagating the data by 5-minute intervals, and we're also dropping NA values.
 
 
 ```r
-stepsPerinterval =  aggregate(activityData[, 'steps'], by = list(activityData$interval), FUN = mean, na.rm = TRUE)
+stepsPerInterval = aggregate(activityData[, 'steps'], by = list(activityData$interval), FUN = mean, na.rm = TRUE)
 ```
 
-Again, giving columns proper names
+Again, giving columns proper names.
 
 
 ```r
-names(stepsPerinterval) <- c("interval", "steps")
+names(stepsPerInterval) <- c("interval", "steps")
 ```
 
-And making a time series plot with ggplot2 plotting system
+And making a time series plot with ggplot2 plotting system.
 
 
 ```r
-ggplot(stepsPerinterval) + 
+ggplot(stepsPerInterval) + 
     aes(x = interval, y = steps) + 
     geom_line() + 
     labs(title = "Time series plot of average number of steps per 5-minute interval")
@@ -94,12 +95,10 @@ To answer the question which 5-minute interval, on average across all the days i
 
 
 ```r
-stepsPerinterval[which.max(stepsPerinterval$steps), ]$interval
+maxStepsInterval <- stepsPerInterval[which.max(stepsPerInterval$steps), ]$interval
 ```
 
-```
-## [1] 835
-```
+The interval with the maximum number of steps is ``835``.
 
 ## Imputing missing values
 Total number of missing values in the initial dataset that we loaded from CSV (the total number of rows with NAs) we can get by doing:
@@ -121,7 +120,7 @@ for (i in 1:nrow(newActivityData)) {
 # check if the 'steps' value is missing
     if (is.na(newActivityData$steps[i])) {
         interval <- as.numeric(newActivityData$interval[i])
-        avgsteps <- stepsPerinterval[which(stepsPerinterval$interval == interval),]$steps
+        avgsteps <- stepsPerInterval[which(stepsPerInterval$interval == interval),]$steps
         newActivityData$steps[i] <- avgsteps
     }
 }
@@ -137,6 +136,8 @@ newStepsPerDay <- aggregate(newActivityData[, 'steps'], by = list(newActivityDat
 names(newStepsPerDay) <- c("date", "steps")
 ```
 
+And now plotting the actual histogram.
+
 
 ```r
 library(ggplot2)
@@ -146,7 +147,7 @@ qplot(x = newStepsPerDay$steps,
       binwidth=1000,
       main =  "Histogram of the total number of steps taken each day",
       xlab = "Number of steps per day",
-      ylab = "Days with same steps count")
+      ylab = "Days with the same steps count")
 ```
 
 ![](figures/histogram2-1.png) 
@@ -188,29 +189,29 @@ newActivityData$type <- as.factor(ifelse(wday(newActivityData$date, label = TRUE
 splittedData <- split(newActivityData, newActivityData$type)
 
 # Data frame with weekend averaged steps per interval
-weekendStepsPerinterval =  aggregate(splittedData$weekend[, 'steps'], 
+weekendStepsPerInterval =  aggregate(splittedData$weekend[, 'steps'], 
                                      by = list(splittedData$weekend$interval), 
                                      FUN = mean)
-names(weekendStepsPerinterval) <- c("interval", "steps")
+names(weekendStepsPerInterval) <- c("interval", "steps")
 
 # Data frame with weekday averaged steps per interval
-weekdayStepsPerinterval =  aggregate(splittedData$weekday[, 'steps'], 
+weekdayStepsPerInterval =  aggregate(splittedData$weekday[, 'steps'], 
                                      by = list(splittedData$weekday$interval), 
                                      FUN = mean)
-names(weekdayStepsPerinterval) <- c("interval", "steps")
+names(weekdayStepsPerInterval) <- c("interval", "steps")
 
 # Adding 'type' variable in each datasets needed for combined plot
-weekendStepsPerinterval$type <- factor(rep("weekend", nrow(weekendStepsPerinterval)), 
+weekendStepsPerInterval$type <- factor(rep("weekend", nrow(weekendStepsPerInterval)), 
                                        levels = c("weekday", "weekend"))
-weekdayStepsPerinterval$type <- factor(rep("weekday", nrow(weekdayStepsPerinterval)), 
+weekdayStepsPerInterval$type <- factor(rep("weekday", nrow(weekdayStepsPerInterval)), 
                                        levels = c("weekday", "weekend"))
 ```
 
-With two new datasets for weekends and weekdays we can make a panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
+With the two new datasets for weekends and weekdays we can make a panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
 
 
 ```r
-ggplot(rbind(weekdayStepsPerinterval, weekendStepsPerinterval)) + 
+ggplot(rbind(weekdayStepsPerInterval, weekendStepsPerInterval)) + 
     aes(x = interval, y = steps) + 
     facet_grid(type ~ .) + 
     geom_line() + 
